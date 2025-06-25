@@ -1,201 +1,161 @@
-# Импорт необходимых модулей
-import random  # Для генерации случайных чисел
-import sys     # Для системных функций (выход из программы)
+import random
 
-# Класс узла двусвязного списка
-class StudentNode:
-    # Конструктор класса
+
+class StudentNode:  # Узел двусвязного списка для хранения данных об ученике
     def __init__(self, name):
-        self.name = name    # Хранит фамилию ученика
-        self.rating = 0     # Начальный рейтинг ученика
-        self.prev = None    # Ссылка на предыдущий узел в списке
-        self.next = None    # Ссылка на следующий узел в списке
+        self.name = name  # Фамилия ученика (строка)
+        self.rating = 0  # Текущий рейтинг ученика (целое число)
+        self.prev = None  # Ссылка на предыдущий узел в списке
+        self.next = None  # Ссылка на следующий узел в списке
 
-# Класс для управления кругом учеников
-class StudentCircle:
-    # Инициализация круга
+
+class StudentCircle:  # Класс для реализации двусвязного циклического списка учеников
     def __init__(self):
-        self.head = None          # Первый элемент списка
-        self.current_marker = None # Текущая позиция начала круга
-        self.size = 0             # Количество учеников в круге
+        self.head = None  # Фиксированный начальный элемент списка
+        self.current_marker = None  # Текущий маркер начала круга
+        self.size = 0  # Количество учеников в круге
 
-    # Добавление нового ученика
-    def add_student(self, name):
-        # Создаем новый узел
-        new_node = StudentNode(name)
+    def add_student(self, name):  # Добавляет нового ученика в круг
+        new_node = StudentNode(name)  # Создаем новый узел
 
-        # Если список пуст
-        if self.head is None:
-            # Делаем узел ссылающимся сам на себя
-            new_node.next = new_node
+        if self.head is None:  # Если список пуст
+            new_node.next = new_node  # Замыкаем ссылки на себя
             new_node.prev = new_node
             self.head = new_node
-            self.current_marker = new_node
-        else:
-            # Добавляем в конец списка
-            last = self.head.prev
-            last.next = new_node
+            self.current_marker = new_node  # Инициализируем маркер
+        else:  # Если в списке уже есть элементы
+            last = self.head.prev  # Находим последний элемент
+            last.next = new_node  # Добавляем новый элемент после последнего
             new_node.prev = last
             new_node.next = self.head
             self.head.prev = new_node
 
-        # Увеличиваем счетчик учеников
-        self.size += 1
+        self.size += 1  # Увеличиваем счетчик учеников
 
-    # Поиск ученика по имени
-    def find_student(self, name):
-        # Если список пуст
-        if self.head is None:
+    def find_student(self, name):  # Ищет ученика по имени (без учета регистра)
+        if self.head is None:  # Если список пуст
             return None
 
-        # Начинаем с головы списка
-        current = self.head
+        current = self.head  # Начинаем поиск с головы списка
         while True:
-            # Сравниваем имена без учета регистра
-            if current.name.lower() == name.lower():
+            if current.name.lower() == name.lower():  # Сравниваем без учета регистра
                 return current
-            # Переходим к следующему ученику
-            current = current.next
-            # Если вернулись к началу - завершаем цикл
-            if current == self.head:
+            current = current.next  # Переходим к следующему
+            if current == self.head:  # Если прошли весь круг
                 break
-        return None
+        return None  # Если не нашли
 
-    # Перемещение по кругу на N шагов
-    def get_student_steps(self, start_node, steps):
-        # Если нет учеников
-        if self.size == 0:
+    def get_student_steps(self, start_node, steps):  # Находит ученика через N шагов
+        if self.size == 0:  # Если список пуст
             return None
 
-        current = start_node
-        # Обработка отрицательных шагов
-        if steps < 0:
+        current = start_node  # Начинаем с указанного узла
+        if steps < 0:  # Обработка отрицательных шагов
             steps = self.size - (abs(steps) % self.size)
 
-        # Нормализация шагов
-        steps %= self.size
+        steps %= self.size  # Нормализуем шаги (убираем полные круги)
 
-        # Выполняем шаги
-        for _ in range(steps):
+        for _ in range(steps):  # Делаем указанное количество шагов
             current = current.next
         return current
 
-    # Вывод текущего состояния круга
-    def print_circle(self):
-        # Проверка на пустой круг
-        if self.head is None:
+    def print_circle(self):  # Выводит текущее состояние круга
+        if self.head is None:  # Если список пуст
             print("Круг пуст")
             return
 
-        current = self.head
+        current = self.head  # Начинаем с головы списка
         print("Текущий круг учеников:")
         while True:
-            # Вывод информации об ученике
             print(f"{current.name} (рейтинг: {current.rating})", end="")
-            # Помечаем начало круга
-            if current == self.current_marker:
+            if current == self.current_marker:  # Помечаем начало круга
                 print(" <- Начало круга")
             else:
                 print()
-            # Переход к следующему ученику
-            current = current.next
-            # Проверка завершения круга
-            if current == self.head:
+            current = current.next  # Переходим к следующему
+            if current == self.head:  # Если прошли весь круг
                 break
 
-    # Сортировка учеников по рейтингу
-    def get_sorted_list(self):
-        # Если нет учеников
-        if self.head is None:
+    def get_students_list(self):  # Возвращает список учеников для сортировки
+        if self.head is None:  # Если список пуст
             return []
 
-        students = []
-        current = self.head
-        index = 0
-        # Собираем всех учеников
+        students = []  # Создаем пустой список для результатов
+        current = self.head  # Начинаем с головы списка
+        index = 0  # Для сохранения исходного порядка
         while True:
+            # Добавляем кортеж (имя, рейтинг, исходный индекс)
             students.append((current.name, current.rating, index))
             index += 1
             current = current.next
-            if current == self.head:
+            if current == self.head:  # Если прошли весь круг
                 break
+        return students
 
-        # Сортировка по убыванию рейтинга
-        students.sort(key=lambda x: (-x[1], x[2]))
-        # Возвращаем только имя и рейтинг
-        return [(name, rating) for name, rating, _ in students]
 
-# Чтение списка учеников из файла
-def read_students_from_file(filename):
-    try:
-        # Открываем файл на чтение
-        with open(filename, 'r', encoding='utf-8') as file:
-            # Читаем непустые строки
-            return [line.strip() for line in file if line.strip()]
-    except FileNotFoundError:
-        # Обработка отсутствия файла
-        print(f"Ошибка: файл {filename} не найден!")
-        sys.exit(1)
-    except Exception as ex:
-        # Обработка других ошибок
-        print(f"Ошибка при чтении файла: {ex}")
-        sys.exit(1)
+# Функция для сортировки списка учеников (вне класса)
+def sort_students_by_rating(students):
+    # Сортируем по убыванию рейтинга (-x[1]), затем по исходному индексу (x[2])
+    students.sort(key=lambda x: (-x[1], x[2]))
 
-# Выбор начального ученика
-def select_starting_student(circle):
-    # Показываем текущий круг
-    circle.print_circle()
+    # Возвращаем только имя и рейтинг (без индекса)
+    return [(name, rating) for name, rating, _ in students]
+
+
+def read_students_from_file():  # Читает список учеников из файла
+    while True:  # Бесконечный цикл для повторных попыток
+        filename = input("Введите имя файла со списком учеников: ")
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                lines = [line.strip() for line in file if line.strip()]
+                if not lines:  # Если файл пустой
+                    print("Файл пуст. Пожалуйста, выберите другой файл.")
+                    continue  # Повторяем запрос файла
+                return lines  # Возвращаем список учеников
+        except FileNotFoundError:
+            print(f"Ошибка: файл '{filename}' не найден!")
+        except Exception as ex:
+            print(f"Ошибка при чтении файла: {ex}")
+        # Цикл продолжится для повторного запроса файла
+
+
+def select_starting_student(circle):  # Выбор ученика для начала игры
+    circle.print_circle()  # Показываем текущий круг
     while True:
-        # Запрос имени ученика
         name = input("\nВведите фамилию ученика для начала: ").strip()
-        # Если ввод пустой - берем первого
-        if not name:
+        if not name:  # Если ввод пустой - берем первого ученика
             return circle.head
 
-        # Поиск ученика
         student = circle.find_student(name)
-        if student:
-            # Устанавливаем маркер начала
-            circle.current_marker = student
+        if student:  # Если ученик найден
+            circle.current_marker = student  # Обновляем маркер начала круга
             return student
         print("Ученик не найден. Попробуйте еще раз.")
 
-# Ввод числа для раунда
-def get_number_input(round_num):
+
+def get_number_input(round_num):  # Запрос числа для раунда
     while True:
         try:
-            # Запрос числа от пользователя
             num_input = input(f"Введите число для раунда {round_num}: ").strip()
-            # Если ввод пустой - генерируем случайное
-            if not num_input:
+            if not num_input:  # Если ввод пустой - генерируем случайное
                 return random.randint(-10, 10)
-            # Преобразуем в число
-            num = int(num_input)
-            # Проверка диапазона
-            if num < -10 or num > 10:
+            num = int(num_input)  # Преобразуем в число
+            if num < -10 or num > 10:  # Проверка диапазона
                 print("Число должно быть от -10 до 10")
                 continue
             return num
         except ValueError:
             print("Ошибка: введите целое число!")
 
-# Основная функция игры
-def main():
-    # Приветствие
+
+def main(): # Основная функция игры с обработкой ошибок чтения файла
     print("=== Игра 'Добрые дела' ===")
     print("Ученики встают в круг и делают добрые дела!")
 
-    # Запрос имени файла
-    filename = input("Введите имя файла со списком учеников: ")
-    # Чтение учеников из файла
-    student_names = read_students_from_file(filename)
+    # Чтение файла с повторными попытками при ошибках
+    student_names = read_students_from_file()
 
-    # Проверка на пустой файл
-    if not student_names:
-        print("Файл не содержит имен учеников!")
-        return
-
-    # Создание круга учеников
+    # Остальной код main() остается без изменений
     circle = StudentCircle()
     for name in student_names:
         circle.add_student(name)
@@ -207,7 +167,6 @@ def main():
     while True:
         try:
             rounds = int(input("\nВведите количество раундов: "))
-            # Проверка положительного числа
             if rounds <= 0:
                 print("Число раундов должно быть > 0")
                 continue
@@ -217,50 +176,52 @@ def main():
 
     # Основной игровой цикл
     for round_num in range(1, rounds + 1):
-        # Получение числа для раунда
         number = get_number_input(round_num)
-        # Определение направления
-        direction = "по часовой" if number > 0 else "против часовой" if number < 0 else "не двигаемся"
+        direction = "по часовой" if number > 0 else "против часовой" \
+            if number < 0 else "не двигаемся"
 
-        # Вывод информации о раунде
         print(f"\nРаунд {round_num}:")
         print(f"Число: {number} ({direction})")
         print(f"Начинаем с: {current_student.name}")
 
         # Выбор ученика для доброго дела
         selected = circle.get_student_steps(current_student, number)
-        # Увеличение рейтинга
-        selected.rating += 1
+        selected.rating += 1  # Увеличиваем рейтинг
 
         # Обновление маркера начала круга
         circle.current_marker = current_student
 
-        # Вывод информации о действии
         print(f"Ученик {selected.name} делает доброе дело!")
         print(f"Новый рейтинг: {selected.rating}")
 
-        # Выбор следующего ученика
-        current_student = selected.next if number > 0 else selected.prev
+        # Определение следующего ученика
+        if number > 0:  # По часовой стрелке
+            current_student = selected.next
+        elif number < 0:  # Против часовой стрелки
+            current_student = selected.prev
+        else:  # Если число 0
+            current_student = selected
+
         # Вывод обновленного круга
         circle.print_circle()
 
-    # Вывод итогов
+    # Вывод итоговых результатов
     print("\n=== Итоговые результаты ===")
     print("Ученики по рейтингу (убывание):")
 
-    # Получение и вывод отсортированного списка
-    sorted_students = circle.get_sorted_list()
+    # Получаем список учеников и сортируем его внешней функцией
+    students = circle.get_students_list()
+    sorted_students = sort_students_by_rating(students)
+
+    # Выводим результаты
     for i, (name, rating) in enumerate(sorted_students, 1):
         print(f"{i}. {name}: {rating}")
 
-# Точка входа в программу
+
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        # Обработка прерывания пользователем
         print("\nПрограмма прервана пользователем.")
     except Exception as err:
-        # Обработка других ошибок
         print(f"Произошла ошибка: {err}")
-
